@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
 import knime
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Response
 
 app = FastAPI()
 knime.executable_path = r"/home/sphynx/projects/knime/knime"
@@ -28,9 +28,9 @@ def list_workflows():
 	}
 
 @app.get( "/workflows/{workflow}" )
-def get_workflows( workflow: str ):
-	import os
-	return os.listdir( os.path.join( workspace_path, workflow ) )
+def get_workflow( workflow: str ):
+	with knime.Workflow( workspace_path = workspace_path, workflow_path = workflow ) as wf:
+		return Response( wf._adjust_svg() )
 
 @app.post( "/workflows/{workflow}/run" )
 def run_workflow(
