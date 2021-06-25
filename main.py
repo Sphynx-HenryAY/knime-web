@@ -1,22 +1,42 @@
 from typing import Dict, Optional
 
-import knime
 from fastapi import FastAPI, Body, Response
+from dotenv import dotenv_values
+
+import knime
+
+settings = dotenv_values( ".env" )
+
+
+env = {
+	"executable_path": settings[ "EXECUTABLE_PATH" ],
+	"workspace_path": settings[ "WORKSPACE_PATH" ]
+}
+
+knime.executable_path = env[ "executable_path" ]
 
 app = FastAPI()
-knime.executable_path = r"/home/sphynx/projects/knime/knime"
-workspace_path = r"/mnt/c/Users/king_/knime-workspace/"
 
-@app.get( "/info" )
-def read_root():
-	return {
-		"executable_path": knime.executable_path,
-		"workspace_path": workspace_path
-	}
+@app.get( "/env" )
+def get_env():
+	return env
+
+@app.post( "/env" )
+def set_env(
+	data = Body(
+		...,
+		example = env
+	),
+):
+	env.update( data )
+	knime.executable_path = env[ "executable_path" ]
+	return env
 
 @app.get( "/workflows/" )
 def list_workflows():
 	import os
+
+	workspace_path = env[ "workspace_path" ]
 
 	def is_workflow( in_path ):
 		return True if "workflow.knime" in os.listdir( os.path.join( workspace_path, in_path ) ) else False
@@ -24,12 +44,12 @@ def list_workflows():
 	return {
 		p: { "is_workflow": is_workflow( p ) }
 		for p in os.listdir( workspace_path )
-		if not p.startswith( "." )
+		if "." in p
 	}
 
 @app.get( "/workflows/{workflow}" )
 def get_workflow( workflow: str ):
-	with knime.Workflow( workspace_path = workspace_path, workflow_path = workflow ) as wf:
+	with knime.Workflow( workspace_path = env[ "workspace_path" ], workflow_path = workflow ) as wf:
 		return Response( wf._adjust_svg() )
 
 @app.post( "/workflows/{workflow}/run" )
@@ -56,7 +76,7 @@ def run_workflow(
 
 	from pandas import DataFrame
 
-	with knime.Workflow( workspace_path = workspace_path, workflow_path = workflow ) as wf:
+	with knime.Workflow( workspace_path = env[ "workspace_path" ], workflow_path = workflow ) as wf:
 		wf.data_table_inputs[0] = DataFrame.from_dict( data, orient = "index" )
 		wf.execute()
 
