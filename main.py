@@ -47,12 +47,12 @@ def list_workflows():
 		if "." in p
 	}
 
-@app.get( "/workflows/{workflow}" )
+@app.get( "/workflows/show/{workflow:path}" )
 def get_workflow( workflow: str ):
 	with knime.Workflow( workspace_path = env[ "workspace_path" ], workflow_path = workflow ) as wf:
 		return Response( wf._adjust_svg() )
 
-@app.post( "/workflows/{workflow}/run" )
+@app.post( "/workflows/run/{workflow:path}" )
 def run_workflow(
 	workflow: str,
 	data = Body(
