@@ -1,4 +1,17 @@
 from fastapi import APIRouter, Body, Response
+from dotenv import dotenv_values
+
+import knime
+
+settings = dotenv_values( ".env" )
+
+env = {
+	"executable_path": settings[ "EXECUTABLE_PATH" ],
+	"workspace_path": settings[ "WORKSPACE_PATH" ]
+}
+
+knime.executable_path = env[ "executable_path" ]
+
 
 router = APIRouter(
 	prefix = "/workflows",
