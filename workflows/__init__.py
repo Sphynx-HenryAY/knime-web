@@ -30,7 +30,7 @@ def list_workflows():
 	return {
 		p: { "is_workflow": is_workflow( p ) }
 		for p in os.listdir( workspace_path )
-		if "." in p
+		if "." not in p
 	}
 
 @router.get( "/show/{workflow:path}" )
