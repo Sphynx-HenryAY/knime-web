@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 
-from . import workflows
+import workflows
 
 app = FastAPI()
 app.include_router( workflows.router )
+
+if __name__ == "__main__":
+	import uvicorn
+	uvicorn.run( "main:app" )
