@@ -1,3 +1,5 @@
-knime
 fastapi
+knime
+pandas
 python-dotenv
+uvicorn
