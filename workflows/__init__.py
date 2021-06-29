@@ -18,18 +18,18 @@ router = APIRouter(
 	tags = [ "workflows" ]
 )
 
-@router.get( "/" )
-def list_workflows():
+@router.get( "/list/{workflow:path}" )
+def list_workflows( workflow ):
 	import os
 
-	workspace_path = env[ "workspace_path" ]
+	workflow_path = os.path.join( env[ "workspace_path" ], workflow )
 
 	def is_workflow( in_path ):
-		return True if "workflow.knime" in os.listdir( os.path.join( workspace_path, in_path ) ) else False
+		return True if "workflow.knime" in os.listdir( os.path.join( workflow_path, in_path ) ) else False
 
 	return {
 		p: { "is_workflow": is_workflow( p ) }
-		for p in os.listdir( workspace_path )
+		for p in os.listdir( workflow_path )
 		if "." not in p
 	}
 
