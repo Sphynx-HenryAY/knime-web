@@ -43,7 +43,7 @@ def run_workflow(
 	workflow: str,
 	data = Body(
 		...,
-		example = {
+		example = [ {
 			"1": {
 				"sepal length": 6.7,
 				"sepal width": 3,
@@ -56,14 +56,17 @@ def run_workflow(
 				"petal length": 1,
 				"petal width": 0.3
 			},
-		}
+		} ]
 	)
 ):
 
 	from pandas import DataFrame
 
 	with knime.Workflow( workspace_path = env[ "workspace_path" ], workflow_path = workflow ) as wf:
-		wf.data_table_inputs[0] = DataFrame.from_dict( data, orient = "index" )
+
+		for i, _ in enumerate( wf.data_table_inputs ):
+			wf.data_table_inputs[i] = DataFrame.from_dict( data[i], orient = "index" )
+
 		wf.execute()
 
-		return wf.data_table_outputs[0]
+		return wf.data_table_outputs
